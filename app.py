@@ -9,9 +9,6 @@ st.title("System Monitor")
 # Setting up columns for better display on wide screen
 cpu_plot = st.empty()
 columns_placeholder = st.empty()
-# cpu = st.empty()
-# memory = st.empty()
-# disk = st.empty()
 
 
 # Create an empty dataframe to store the metrics
@@ -76,15 +73,12 @@ def main():
         cpu_col, memory_col, disk_col, temp_col = st.columns(4)
 
         # CPU Metrics
-        # cpu_col.header("CPU Usage")
         cpu_col.metric("CPU Usage", cpu_usage)
 
         # Memory metrics
-        # memory_col.header("Memory Usage")
         memory_col.metric("Memory Usage", memory_usage)
 
         # Disk metrics
-        # disk_col.header("Disk Usage")
         disk_col.metric("Disk Usage", disk_usage)
 
 
