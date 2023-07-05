@@ -15,7 +15,7 @@ columns_placeholder = st.empty()
 
 
 # Create an empty dataframe to store the metrics
-metrics_df = pd.DataFrame(columns=["Timestamp", "CPU", "Memory", "Disk"])
+metrics_df = pd.DataFrame(columns=["Timestamp", "CPU", "Memory", "Disk", "Temperature"])
 
 
 def get_metrics():
@@ -31,15 +31,27 @@ def get_metrics():
     # Get disk usage
     disk_usage = psutil.disk_usage("/").percent
 
-    return timestamp, cpu_usage, memory_usage, disk_usage
+    # Get Temperature Metric
+    temperatures = psutil.sensors_temperatures()
+
+    # Extract Specified Temperature
+    temperature = None
+    if "coretemp" in temperatures:
+        coretemp_temps = temperatures["coretemp"]
+        for temp in coretemp_temps:
+            if temp.label == "Package id 0":
+                temperature = temp.current
+                break
+
+    return timestamp, cpu_usage, memory_usage, disk_usage, temperature
 
 
 def main():
     # Polling initial data
-    timestamp, cpu_usage, memory_usage, disk_usage = get_metrics()
+    timestamp, cpu_usage, memory_usage, disk_usage, temperature = get_metrics()
 
     # Append current metrics to the dataframe
-    metrics_df.loc[len(metrics_df)] = [timestamp, cpu_usage, memory_usage, disk_usage]
+    metrics_df.loc[len(metrics_df)] = [timestamp, cpu_usage, memory_usage, disk_usage, temperature]
 
     # Keep only the most recent 3600 data points
     metrics_df_trimmed = metrics_df[-86400:]
@@ -48,18 +60,20 @@ def main():
     # Plotting all three metrics
     cpu_fig = px.line(
         metrics_df_trimmed, x="Timestamp",
-        y=["CPU", "Memory", "Disk"],
+        y=["CPU", "Memory", "Disk", "Temperature"],
         title="CPU Usage",
         labels={
             "CPU": "%",
             "Memory": "%",
-            "Disk": "%"}
+            "Disk": "%",
+            "Temperature": "Temperature (°C)"
+            }
     )
     cpu_plot.plotly_chart(cpu_fig)
 
     # Columns for metrics
     with columns_placeholder:
-        cpu_col, memory_col, disk_col = st.columns(3)
+        cpu_col, memory_col, disk_col, temp_col = st.columns(4)
 
         # CPU Metrics
         # cpu_col.header("CPU Usage")
@@ -72,6 +86,10 @@ def main():
         # Disk metrics
         # disk_col.header("Disk Usage")
         disk_col.metric("Disk Usage", disk_usage)
+
+
+        # Temperature Metrics
+        temp_col.metric("Package id 0", temperature)
 
 
 if __name__ == "__main__":
