@@ -9,7 +9,6 @@ import plotly.express as px
 import sqlite3
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
-import time
 
 
 # Figure template
@@ -33,6 +32,7 @@ def fetch_latest_metric():
         columns = ["id", "timestamp", "cpu", "memory", "disk", "temperature"]
         latest_metric = pd.DataFrame([row], columns=columns)
     return latest_metric
+
 
 # Fetch metrics from the last hour
 def fetch_metrics_last_hour():
@@ -82,10 +82,6 @@ def create_dial_gauge(metric_name, metric_value):
 # Create line graph for the last hour of metrics
 def create_metrics_graph(metrics_df):
     fig = px.line(metrics_df, x="timestamp", y=["cpu", "memory", "disk", "temperature"])
-    # fig.update_traces(
-        # name=["CPU Usage", "Memory Usage", "Disk Usage", "Temperature"],
-        # hovertemplate='Metric: %{name}<br>Value: %{y}'
-    # )
     fig.update_layout(
         template="plotly_dark",
         xaxis_title="Timestamp",
@@ -141,7 +137,7 @@ app.layout = dbc.Container([
         id='metrics-graph',
         figure=create_metrics_graph(metrics_df)
     ),
-        dcc.Interval(
+    dcc.Interval(
         id='interval-component',
         interval=1000,  # Refresh interval in milliseconds
         n_intervals=0
