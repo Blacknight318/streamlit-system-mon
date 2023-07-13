@@ -9,6 +9,7 @@ import plotly.express as px
 import sqlite3
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+from memory_profiler import profile
 
 
 # Figure template
